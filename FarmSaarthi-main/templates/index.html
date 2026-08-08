@@ -483,5 +483,247 @@
         populateDistricts(stateSelect.value);
         applyTranslations();
     </script>
+    <!-- Advisory History Section -->
+<section class="advisory-section">
+    <div class="section-heading">
+        <div>
+            <span class="section-label">FARM ADVISORY</span>
+            <h2>Advisory History</h2>
+            <p>Track recommendations and their current status.</p>
+        </div>
+    </div>
+
+    <div id="advisoryList" class="advisory-list">
+        <p class="loading-text">Loading advisories...</p>
+    </div>
+</section>
+<script>
+
+async function loadAdvisories() {
+
+    const container = document.getElementById("advisoryList");
+
+    try {
+
+        const response = await fetch("/api/advisories");
+
+        const data = await response.json();
+
+        if (!data.success || !data.advisories.length) {
+
+            container.innerHTML = `
+                <p class="loading-text">
+                    No advisories available.
+                </p>
+            `;
+
+            return;
+        }
+
+        container.innerHTML = data.advisories
+            .map(advisory => createAdvisoryCard(advisory))
+            .join("");
+
+    } catch (error) {
+
+        console.error("Failed to load advisories:", error);
+
+        container.innerHTML = `
+            <p class="loading-text">
+                Unable to load advisories.
+            </p>
+        `;
+    }
+}
+
+
+function createAdvisoryCard(advisory) {
+
+    const timelineHTML = (advisory.timeline || [])
+        .map(item => `
+            <div class="timeline-item">
+
+                <div class="timeline-status">
+                    ${formatStatus(item.status)}
+                </div>
+
+                <div class="timeline-time">
+                    ${formatDate(item.timestamp)}
+                </div>
+
+            </div>
+        `)
+        .join("");
+
+
+    return `
+        <div class="advisory-card">
+
+            <div class="advisory-top">
+
+                <div>
+
+                    <div class="advisory-id">
+                        ${advisory.id}
+                    </div>
+
+                    <h3>
+                        ${advisory.recommendation}
+                    </h3>
+
+                    <div class="advisory-location">
+                        ${advisory.district}, ${advisory.state}
+                    </div>
+
+                </div>
+
+
+                <span class="status-badge ${getStatusClass(advisory.status)}">
+                    ${formatStatus(advisory.status)}
+                </span>
+
+            </div>
+
+
+            <div class="advisory-description">
+                ${advisory.description}
+            </div>
+
+
+            <div class="status-control">
+
+                <label>
+                    Update Status:
+                </label>
+
+                <select
+                    onchange="updateAdvisoryStatus('${advisory.id}', this.value)"
+                >
+
+                    <option value="NEW"
+                        ${advisory.status === "NEW" ? "selected" : ""}>
+                        New
+                    </option>
+
+                    <option value="IN_REVIEW"
+                        ${advisory.status === "IN_REVIEW" ? "selected" : ""}>
+                        In Review
+                    </option>
+
+                    <option value="ACTION_TAKEN"
+                        ${advisory.status === "ACTION_TAKEN" ? "selected" : ""}>
+                        Action Taken
+                    </option>
+
+                    <option value="RESOLVED"
+                        ${advisory.status === "RESOLVED" ? "selected" : ""}>
+                        Resolved
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="timeline">
+
+                ${timelineHTML}
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+async function updateAdvisoryStatus(id, status) {
+
+    try {
+
+        const response = await fetch(
+            `/api/advisories/${id}/status`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    status: status
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.success) {
+
+            alert("Failed to update advisory status.");
+
+            return;
+        }
+
+
+        await loadAdvisories();
+
+    } catch (error) {
+
+        console.error("Status update failed:", error);
+
+        alert("Could not update advisory status.");
+    }
+}
+
+
+function formatStatus(status) {
+
+    return status
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+
+function getStatusClass(status) {
+
+    switch (status) {
+
+        case "NEW":
+            return "status-new";
+
+        case "IN_REVIEW":
+            return "status-review";
+
+        case "ACTION_TAKEN":
+            return "status-action";
+
+        case "RESOLVED":
+            return "status-resolved";
+
+        default:
+            return "status-new";
+    }
+}
+
+
+function formatDate(timestamp) {
+
+    if (!timestamp) {
+        return "";
+    }
+
+    const date = new Date(timestamp);
+
+    return date.toLocaleString();
+}
+
+
+// Load advisories when page opens
+loadAdvisories();
+
+</script>
+
 </body>
 </html>

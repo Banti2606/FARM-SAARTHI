@@ -1,7 +1,24 @@
 from flask import Flask, jsonify, render_template, request
-
+import json
+import os
+from datetime import datetime
 from engine import FarmSaarthiEngine
 
+ADVISORIES_FILE = os.path.join(
+    os.path.dirname(__file__),
+    "data",
+    "advisories.json"
+)
+def load_advisories():
+    if not os.path.exists(ADVISORIES_FILE):
+        return []
+
+    with open(ADVISORIES_FILE, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+def save_advisories(advisories):
+    with open(ADVISORIES_FILE, "w", encoding="utf-8") as file:
+        json.dump(advisories, file, indent=2, ensure_ascii=False)
 
 app = Flask(__name__)
 engine = FarmSaarthiEngine()
@@ -285,6 +302,69 @@ def analyze():
         return jsonify(result), 400
     return jsonify(result)
 
+@app.route("/api/advisories", methods=["GET"])
+def get_advisories():
+    advisories = load_advisories()
+
+    return jsonify({
+        "success": True,
+        "count": len(advisories),
+        "advisories": advisories
+    })
+
+@app.route("/api/advisories/<advisory_id>/status", methods=["POST"])
+def update_advisory_status(advisory_id):
+
+    data = request.get_json()
+
+    if not data or "status" not in data:
+        return jsonify({
+            "success": False,
+            "error": "Status is required"
+        }), 400
+
+    new_status = data["status"]
+
+    allowed_statuses = [
+        "NEW",
+        "IN_REVIEW",
+        "ACTION_TAKEN",
+        "RESOLVED"
+    ]
+
+    if new_status not in allowed_statuses:
+        return jsonify({
+            "success": False,
+            "error": "Invalid advisory status"
+        }), 400
+
+    advisories = load_advisories()
+
+    for advisory in advisories:
+
+        if advisory["id"] == advisory_id:
+
+            now = datetime.now().isoformat()
+
+            advisory["status"] = new_status
+            advisory["updated_at"] = now
+
+            advisory.setdefault("timeline", []).append({
+                "status": new_status,
+                "timestamp": now
+            })
+
+            save_advisories(advisories)
+
+            return jsonify({
+                "success": True,
+                "advisory": advisory
+            })
+
+    return jsonify({
+        "success": False,
+        "error": "Advisory not found"
+    }), 404
 
 if __name__ == "__main__":
     import os

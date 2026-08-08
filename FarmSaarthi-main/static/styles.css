@@ -464,3 +464,149 @@ input:focus {
         min-width: 0;
     }
 }
+/* ================================
+   Advisory History
+================================ */
+
+.advisory-section {
+    margin: 40px auto;
+    max-width: 1100px;
+    padding: 30px;
+}
+
+.section-heading {
+    margin-bottom: 25px;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: 0.7;
+}
+
+.section-heading h2 {
+    margin: 6px 0;
+    font-size: 32px;
+}
+
+.section-heading p {
+    margin: 0;
+    opacity: 0.7;
+}
+
+.advisory-list {
+    display: grid;
+    gap: 20px;
+}
+
+.advisory-card {
+    padding: 24px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.advisory-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.advisory-id {
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.6;
+}
+
+.advisory-card h3 {
+    margin: 5px 0;
+    font-size: 22px;
+}
+
+.advisory-location {
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.advisory-description {
+    margin: 12px 0;
+    line-height: 1.5;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 7px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-new {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-review {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-action {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.status-resolved {
+    background: #e0f2f1;
+    color: #00695c;
+}
+
+.status-control {
+    margin-top: 15px;
+}
+
+.status-control select {
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white;
+}
+
+.timeline {
+    margin-top: 22px;
+    padding-left: 18px;
+    border-left: 2px solid #ddd;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 18px;
+    padding-left: 15px;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -24px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2f5d3a;
+}
+
+.timeline-status {
+    font-weight: 700;
+}
+
+.timeline-time {
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.loading-text {
+    opacity: 0.6;
+}
